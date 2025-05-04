@@ -1,4 +1,5 @@
 # baitaplonC
+# tham khảo claude giải thích (chưa dùng được đâu): https://github.com/copilot/share/c8084206-4a24-8ce1-b801-f849242d41ac
 công việc cần thực hiện: <br>
 <ol>
         <li>Nêu ý tưởng phần mềm, dựa trên thực tiễn hiện trạng để xe đang cần... và chúng ta mong muốn chương trình sẽ giải quyết được...</li>
