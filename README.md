@@ -1,4 +1,4 @@
-# baitaplonC
+# baitaplonC: https://docs.google.com/document/d/1DCo8sjknIELmjTRAT5pD-G8la2oRzoJ32yNDgTPzCy8/edit?usp=sharing
 # tham khảo claude giải thích (chưa dùng được đâu): https://github.com/copilot/share/c8084206-4a24-8ce1-b801-f849242d41ac
 công việc cần thực hiện: <br>
 <ol>
