@@ -13,17 +13,30 @@ typedef struct {
     long thoiGianConLai;  // Thời gian còn lại
 } Xe;
 
+// Định nghĩa cấu trúc dữ liệu cho xe đã đăng ký
+typedef struct {
+    char bienSo[20];
+    long thoiGianConLai;  // Thời gian còn lại của xe
+} XeDaDangKy;
+
 // Khai báo biến toàn cục
 #define MAX_XE 100
+#define MAX_XE_DANG_KY 1000
 Xe danhSachXe[MAX_XE];
+XeDaDangKy danhSachXeDaDangKy[MAX_XE_DANG_KY];
 int soLuongXe = 0;
+int soLuongXeDaDangKy = 0;
 
 // Khai báo các hàm
 void xeVao();
 void xeRa();
 int timXe(char *bienSo);
+int timXeDaDangKy(char *bienSo);
+void capNhatXeDaDangKy(char *bienSo, long thoiGianConLai);
 void luuDuLieu();
 void docDuLieu();
+void luuDuLieuXeDaDangKy();
+void docDuLieuXeDaDangKy();
 void xuLyXeChuaDangKy(char* bienSo);
 void xuLyXeDaDangKy(char* bienSo);
 
@@ -33,6 +46,7 @@ int main() {
     
     // Đọc dữ liệu từ file (nếu có)
     docDuLieu();
+    docDuLieuXeDaDangKy();
     
     while (1) {
         printf("\n===== HE THONG QUAN LY NHA DE XE =====\n");
@@ -116,6 +130,33 @@ void xuLyXeChuaDangKy(char* bienSo) {
     soLuongXe++;
 }
 
+// Tìm xe đã đăng ký trong danh sách
+int timXeDaDangKy(char* bienSo) {
+    for (int i = 0; i < soLuongXeDaDangKy; i++) {
+        if (strcmp(danhSachXeDaDangKy[i].bienSo, bienSo) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Cập nhật thông tin xe đã đăng ký
+void capNhatXeDaDangKy(char* bienSo, long thoiGianConLai) {
+    int viTri = timXeDaDangKy(bienSo);
+    
+    if (viTri != -1) {
+        // Cập nhật thời gian còn lại
+        danhSachXeDaDangKy[viTri].thoiGianConLai = thoiGianConLai;
+    } else if (thoiGianConLai > 0) {
+        // Thêm xe vào danh sách nếu còn thời gian
+        if (soLuongXeDaDangKy < MAX_XE_DANG_KY) {
+            strcpy(danhSachXeDaDangKy[soLuongXeDaDangKy].bienSo, bienSo);
+            danhSachXeDaDangKy[soLuongXeDaDangKy].thoiGianConLai = thoiGianConLai;
+            soLuongXeDaDangKy++;
+        }
+    }
+}
+
 // Xử lý xe đã đăng ký
 void xuLyXeDaDangKy(char* bienSo) {
     if (soLuongXe >= MAX_XE) {
@@ -123,10 +164,22 @@ void xuLyXeDaDangKy(char* bienSo) {
         return;
     }
     
+    int viTriXeDaDangKy = timXeDaDangKy(bienSo);
+    long thoiGianConLai = 0;
+    
+    if (viTriXeDaDangKy != -1) {
+        thoiGianConLai = danhSachXeDaDangKy[viTriXeDaDangKy].thoiGianConLai;
+        printf("Xe da dang ky co %ld giay con lai.\n", thoiGianConLai);
+    }
+    
     int chonNapTien;
     printf("Lua chon nap tien:\n");
-    printf("1. Nap tien ngay\n");
-    printf("2. Khong nap tien\n");
+    printf("1. Nap tien moi\n");
+    if (thoiGianConLai > 0) {
+        printf("2. Su dung thoi gian con lai (%ld giay)\n", thoiGianConLai);
+    } else {
+        printf("2. Khong nap tien\n");
+    }
     printf("Nhap lua chon: ");
     scanf("%d", &chonNapTien);
     
@@ -142,9 +195,16 @@ void xuLyXeDaDangKy(char* bienSo) {
         
         danhSachXe[soLuongXe].daNapTien = 1;
         danhSachXe[soLuongXe].thoiGianNap = soTien;
-        danhSachXe[soLuongXe].thoiGianConLai = soTien;
+        danhSachXe[soLuongXe].thoiGianConLai = soTien + thoiGianConLai;
         
-        printf("Xe da dang ky vao bai voi %ld giay da nap.\n", soTien);
+        printf("Xe da dang ky vao bai voi %ld giay (bao gom %ld giay cu).\n", 
+               soTien + thoiGianConLai, thoiGianConLai);
+    } else if (chonNapTien == 2 && thoiGianConLai > 0) {
+        danhSachXe[soLuongXe].daNapTien = 1;
+        danhSachXe[soLuongXe].thoiGianNap = 0;
+        danhSachXe[soLuongXe].thoiGianConLai = thoiGianConLai;
+        
+        printf("Xe da dang ky vao bai voi %ld giay con lai.\n", thoiGianConLai);
     } else {
         danhSachXe[soLuongXe].daNapTien = 0;
         danhSachXe[soLuongXe].thoiGianNap = 0;
@@ -185,16 +245,20 @@ void xeRa() {
             if (thoiGianConLaiCapNhat >= 0) {
                 printf("Thoi gian con lai: %ld giay\n", thoiGianConLaiCapNhat);
                 printf("Khong can thanh toan them.\n");
+                
+                // Lưu thời gian còn lại cho xe đã đăng ký
+                capNhatXeDaDangKy(danhSachXe[viTri].bienSo, thoiGianConLaiCapNhat);
             } else {
                 printf("Vuot qua thoi gian da nap: %ld giay\n", -thoiGianConLaiCapNhat);
                 printf("So tien can thanh toan them: %ld dong\n", -thoiGianConLaiCapNhat);
+                
+                // Xóa hoặc đặt thời gian còn lại về 0
+                capNhatXeDaDangKy(danhSachXe[viTri].bienSo, 0);
             }
         } else {
-            // Đã đăng ký nhưng không nạp tiền
             printf("So tien can thanh toan: %ld dong\n", thoiGianGui);
         }
     } else {
-        // Xe chưa đăng ký
         printf("So tien can thanh toan: %ld dong\n", thoiGianGui);
     }
     
@@ -206,6 +270,7 @@ void xeRa() {
     
     printf("Xe da ra khoi bai do.\n");
     luuDuLieu();
+    luuDuLieuXeDaDangKy();  // Lưu dữ liệu xe đã đăng ký
 }
 
 // Hàm tìm xe trong danh sách
@@ -242,6 +307,34 @@ void docDuLieu() {
     
     fread(&soLuongXe, sizeof(int), 1, file);
     fread(danhSachXe, sizeof(Xe), soLuongXe, file);
+    
+    fclose(file);
+}
+
+// Lưu dữ liệu xe đã đăng ký ra file
+void luuDuLieuXeDaDangKy() {
+    FILE* file = fopen("xe_da_dang_ky.bin", "wb");
+    if (file == NULL) {
+        printf("Loi: Khong the luu du lieu xe da dang ky!\n");
+        return;
+    }
+    
+    fwrite(&soLuongXeDaDangKy, sizeof(int), 1, file);
+    fwrite(danhSachXeDaDangKy, sizeof(XeDaDangKy), soLuongXeDaDangKy, file);
+    
+    fclose(file);
+}
+
+// Đọc dữ liệu xe đã đăng ký từ file
+void docDuLieuXeDaDangKy() {
+    FILE* file = fopen("xe_da_dang_ky.bin", "rb");
+    if (file == NULL) {
+        printf("Khong tim thay du lieu xe da dang ky. Bat dau voi database trong.\n");
+        return;
+    }
+    
+    fread(&soLuongXeDaDangKy, sizeof(int), 1, file);
+    fread(danhSachXeDaDangKy, sizeof(XeDaDangKy), soLuongXeDaDangKy, file);
     
     fclose(file);
 }
